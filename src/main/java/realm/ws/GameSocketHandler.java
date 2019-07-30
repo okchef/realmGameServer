@@ -11,6 +11,8 @@ import org.springframework.web.socket.handler.TextWebSocketHandler;
 import realm.GameMessageBroker;
 import realm.SessionManager;
 
+import java.io.IOException;
+
 @Component
 public class GameSocketHandler extends TextWebSocketHandler {
 
@@ -22,9 +24,6 @@ public class GameSocketHandler extends TextWebSocketHandler {
 
     @Override
     public void handleTextMessage(WebSocketSession session, TextMessage message) {
-
-        System.out.println("POOP: " + message.getPayload());
-
         JsonObject convertedObject = new Gson().fromJson(message.getPayload(), JsonObject.class);
         gameMessageBroker.brokerMessage(session, message);
     }
@@ -36,9 +35,13 @@ public class GameSocketHandler extends TextWebSocketHandler {
     }
 
     @Override
-    public void afterConnectionClosed(WebSocketSession session, CloseStatus status) {
+    public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws IOException {
         sessionManager.removeGameSession();
         System.out.println("Game Closed (Session ID " + session.getId() + ")");
+
+        for (WebSocketSession playerSession : sessionManager.getPlayerSessions()) {
+            playerSession.close(CloseStatus.NO_STATUS_CODE);
+        }
     }
 
 }

@@ -1,7 +1,5 @@
 package realm.ws;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
@@ -10,6 +8,8 @@ import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 import realm.PlayerMessageBroker;
 import realm.SessionManager;
+import realm.events.PlayerConnectedEvent;
+import realm.events.PlayerDisconnectedEvent;
 
 import java.io.IOException;
 
@@ -24,21 +24,33 @@ public class PlayerSocketHandler extends TextWebSocketHandler {
 
     @Override
     public void handleTextMessage(WebSocketSession session, TextMessage message) throws IOException {
-
-        System.out.println("POOP: " + message.getPayload());
-
-        JsonObject convertedObject = new Gson().fromJson(message.getPayload(), JsonObject.class);
         playerMessageBroker.brokerMessage(session, message);
     }
 
     @Override
-    public void afterConnectionEstablished(WebSocketSession session) {
+    public void afterConnectionEstablished(WebSocketSession session) throws IOException {
         sessionManager.addPlayerSession(session);
+
+        WebSocketSession gameSession = sessionManager.getGameSession();
+        if (gameSession != null) {
+            PlayerConnectedEvent playerConnectedEvent = new PlayerConnectedEvent(session.getId());
+            RealmWebSocketMessage playerConnectedMessage = new RealmWebSocketMessage(null, gameSession.getId(), session.getId(), playerConnectedEvent);
+            gameSession.sendMessage(playerConnectedMessage.getMessage());
+        } else {
+            session.close(CloseStatus.NO_STATUS_CODE);
+        }
+
         System.out.println("Player Joined (Session ID " + session.getId() + ")");
     }
 
     @Override
-    public void afterConnectionClosed(WebSocketSession session, CloseStatus status) {
+    public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws IOException {
+        WebSocketSession gameSession = sessionManager.getGameSession();
+        if (gameSession != null) {
+            PlayerDisconnectedEvent playerDisconnectedEvent = new PlayerDisconnectedEvent(session.getId());
+            RealmWebSocketMessage playerDisconnectedMessage = new RealmWebSocketMessage(null, gameSession.getId(), session.getId(), playerDisconnectedEvent);
+            gameSession.sendMessage(playerDisconnectedMessage.getMessage());
+        }
         System.out.println("Player Left (Session ID " + session.getId() + ")");
     }
 

@@ -13,7 +13,7 @@ public class PlayerMessageBroker extends AbstractMessageBroker {
     public void brokerMessage(WebSocketSession session, TextMessage message) throws IOException {
         WebSocketSession gameSession = sessionManager.getGameSession();
         if (gameSession != null) {
-            gameSession.sendMessage(new TextMessage("Blorp"));
+            gameSession.sendMessage(new TextMessage("{}"));
         }
     }
 }
