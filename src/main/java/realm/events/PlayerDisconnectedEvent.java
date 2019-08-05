@@ -1,16 +1,17 @@
 package realm.events;
 
-import realm.mutaters.IRealmStateMutator;
+import realm.mutators.IRealmStateMutator;
+import realm.state.PlayerState;
 import realm.state.RealmState;
-import realm.state.IRealmStateSelector;
+import realm.state.selectors.IRealmStateSelector;
+import realm.state.selectors.PlayerStateSelector;
 
 @RealmEvent(EventType.PLAYER_DISCONNECTED)
 public class PlayerDisconnectedEvent  extends AbstractRealmEvent {
-    public String playerSessionId;
+    private final String playerSessionId;
 
-    public String gameSessionId;
-
-    public PlayerDisconnectedEvent(String playerSessionId) {
+    public PlayerDisconnectedEvent(String gameId, String playerId, String playerSessionId) {
+        super(gameId, playerId);
         this.playerSessionId = playerSessionId;
     }
 
@@ -22,18 +23,14 @@ public class PlayerDisconnectedEvent  extends AbstractRealmEvent {
     @Override
     public IRealmStateMutator getStateMutator() {
         return (RealmState realmState) -> {
-            // For now, remove player from state when disconnecting. Later, we will allow selecting an
-            // existing player and changing their state to connected. Currently, it is assumed that
-            // all players in the state will be in a connected state.
-
-            realmState.playerStates.removeIf(playerState -> playerState.playerSessionId.equals(playerSessionId));
+            PlayerState playerState = realmState.getPlayerById(getPlayerId());
+            playerState.setConnected(false);
+            playerState.setPlayerSessionId(null);
         };
     }
 
     @Override
     public IRealmStateSelector getStateSelector() {
-        return (RealmState realmState) -> {
-            return null;
-        };
+        return new PlayerStateSelector(getPlayerId());
     }
 }

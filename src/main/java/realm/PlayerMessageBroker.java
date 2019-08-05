@@ -18,41 +18,44 @@ public class PlayerMessageBroker extends AbstractMessageBroker {
         WebSocketSession gameSession = sessionManager.getGameSession();
         if (gameSession != null) {
             System.out.println("Player Message: " + inMessage.getPayload());
-            AbstractRealmEvent realmEvent = realmEventFactory.getRealmEvent(inMessage.getPayload());
-            realmEvent.playerId = session.getId();
+            AbstractRealmEvent realmEvent = realmEventFactory.getRealmEvent(null, realmStateManager.getPlayerIdFromPlayerSessionId(session.getId()), inMessage.getPayload());
 
             if (realmEvent != null) {
-                // Mutate the game state based on the incoming event.
-                realmStateManager.mutateState(realmEvent);
-
-                // Grab the relevant state fragment for outMessage.
-                IRealmStateFragment realmStateFragment = realmStateManager.getStateFragment(realmEvent);
-
-                // Forward appropriate message details to all required parties.
-                // In the future, explore the possibility of only communicating the relevant
-                // portion of the updated state, rather than the original action/event payload. This could
-                // cut down on duplicated event-processing logic between server/playerClient/gameClient.
-                RealmWebSocketMessage realmWebSocketMessage = new RealmWebSocketMessage(null, gameSession.getId(), session.getId(), realmEvent);
-
-                ArrayList<WebSocketSession> targetSessions = new ArrayList<>();
-                switch(realmEvent.getEventTarget()) {
-                    case All:
-                        targetSessions.addAll(sessionManager.getOtherPlayerSessions(session));
-                        targetSessions.add(gameSession);
-                        break;
-                    case AllPlayers:
-                        targetSessions.addAll(sessionManager.getOtherPlayerSessions(session));
-                        break;
-                    case GameServer:
-                        targetSessions.add(gameSession);
-                        break;
-                }
-
-                TextMessage outMessage = realmWebSocketMessage.getMessage();
-                for (WebSocketSession targetSession : targetSessions) {
-                    targetSession.sendMessage(outMessage);
-                }
+                handleEvent(gameSession, session, realmEvent);
             }
+        }
+    }
+
+    public void handleEvent(WebSocketSession gameSession, WebSocketSession playerSession, AbstractRealmEvent realmEvent) throws IOException {
+        // Mutate the game state based on the incoming event.
+        realmStateManager.mutateState(realmEvent);
+
+        // Grab the relevant state fragment for outMessage.
+        IRealmStateFragment realmStateFragment = realmStateManager.getStateFragment(realmEvent);
+
+        // Forward appropriate message details to all required parties.
+        // In the future, explore the possibility of only communicating the relevant
+        // portion of the updated state, rather than the original action/event payload. This could
+        // cut down on duplicated event-processing logic between server/playerClient/gameClient.
+        RealmWebSocketMessage realmWebSocketMessage = new RealmWebSocketMessage(null, gameSession.getId(), playerSession.getId(), realmEvent, realmStateFragment);
+
+        ArrayList<WebSocketSession> targetSessions = new ArrayList<>();
+        switch(realmEvent.getEventTarget()) {
+            case All:
+                targetSessions.addAll(sessionManager.getOtherPlayerSessions(playerSession));
+                targetSessions.add(gameSession);
+                break;
+            case AllPlayers:
+                targetSessions.addAll(sessionManager.getOtherPlayerSessions(playerSession));
+                break;
+            case GameServer:
+                targetSessions.add(gameSession);
+                break;
+        }
+
+        TextMessage outMessage = realmWebSocketMessage.getMessage();
+        for (WebSocketSession targetSession : targetSessions) {
+            targetSession.sendMessage(outMessage);
         }
     }
 }

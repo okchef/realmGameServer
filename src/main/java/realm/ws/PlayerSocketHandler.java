@@ -10,8 +10,10 @@ import realm.PlayerMessageBroker;
 import realm.SessionManager;
 import realm.events.PlayerConnectedEvent;
 import realm.events.PlayerDisconnectedEvent;
+import realm.state.RealmStateManager;
 
 import java.io.IOException;
+import java.util.UUID;
 
 @Component
 public class PlayerSocketHandler extends TextWebSocketHandler {
@@ -21,6 +23,9 @@ public class PlayerSocketHandler extends TextWebSocketHandler {
 
     @Autowired
     private PlayerMessageBroker playerMessageBroker;
+
+    @Autowired
+    private RealmStateManager realmStateManager;
 
     @Override
     public void handleTextMessage(WebSocketSession session, TextMessage message) throws IOException {
@@ -33,9 +38,8 @@ public class PlayerSocketHandler extends TextWebSocketHandler {
 
         WebSocketSession gameSession = sessionManager.getGameSession();
         if (gameSession != null) {
-            PlayerConnectedEvent playerConnectedEvent = new PlayerConnectedEvent(session.getId());
-            RealmWebSocketMessage playerConnectedMessage = new RealmWebSocketMessage(null, gameSession.getId(), session.getId(), playerConnectedEvent);
-            gameSession.sendMessage(playerConnectedMessage.getMessage());
+            PlayerConnectedEvent playerConnectedEvent = new PlayerConnectedEvent(null, UUID.randomUUID().toString(), session.getId());
+            playerMessageBroker.handleEvent(gameSession, session, playerConnectedEvent);
         } else {
             session.close(CloseStatus.NO_STATUS_CODE);
         }
@@ -47,10 +51,10 @@ public class PlayerSocketHandler extends TextWebSocketHandler {
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws IOException {
         WebSocketSession gameSession = sessionManager.getGameSession();
         if (gameSession != null) {
-            PlayerDisconnectedEvent playerDisconnectedEvent = new PlayerDisconnectedEvent(session.getId());
-            RealmWebSocketMessage playerDisconnectedMessage = new RealmWebSocketMessage(null, gameSession.getId(), session.getId(), playerDisconnectedEvent);
-            gameSession.sendMessage(playerDisconnectedMessage.getMessage());
+            PlayerDisconnectedEvent playerDisconnectedEvent = new PlayerDisconnectedEvent(null, realmStateManager.getPlayerIdFromPlayerSessionId(session.getId()), session.getId());
+            playerMessageBroker.handleEvent(gameSession, session, playerDisconnectedEvent);
         }
+        sessionManager.removePlayerSession(session);
         System.out.println("Player Left (Session ID " + session.getId() + ")");
     }
 

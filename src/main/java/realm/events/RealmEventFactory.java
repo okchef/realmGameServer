@@ -37,7 +37,7 @@ public class RealmEventFactory {
         }
     }
 
-    public AbstractRealmEvent getRealmEvent(String json) {
+    public AbstractRealmEvent getRealmEvent(String gameId, String playerId, String json) {
         Gson gson = new Gson();
 
         JsonObject jsonObject = gson.fromJson(json, JsonObject.class);
@@ -45,6 +45,8 @@ public class RealmEventFactory {
 
         if (eventTypes.containsKey(eventType)) {
             AbstractRealmEvent abstractRealmEvent = gson.fromJson(jsonObject.get("realmEvent"), eventTypes.get(eventType));
+            abstractRealmEvent.setGameId(gameId);
+            abstractRealmEvent.setPlayerId(playerId);
             return abstractRealmEvent;
         } else {
             System.err.println("Could not find matching realmEventType: " + eventType);

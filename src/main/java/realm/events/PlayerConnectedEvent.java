@@ -1,17 +1,17 @@
 package realm.events;
 
-import realm.mutaters.IRealmStateMutator;
+import realm.mutators.IRealmStateMutator;
 import realm.state.PlayerState;
 import realm.state.RealmState;
-import realm.state.IRealmStateSelector;
+import realm.state.selectors.IRealmStateSelector;
+import realm.state.selectors.PlayerStateSelector;
 
 @RealmEvent(EventType.PLAYER_CONNECTED)
 public class PlayerConnectedEvent extends AbstractRealmEvent {
-    public String playerSessionId;
+    private final String playerSessionId;
 
-    public String gameSessionId;
-
-    public PlayerConnectedEvent(String playerSessionId) {
+    public PlayerConnectedEvent(String gameId, String playerId, String playerSessionId) {
+        super(gameId, playerId);
         this.playerSessionId = playerSessionId;
     }
 
@@ -27,16 +27,15 @@ public class PlayerConnectedEvent extends AbstractRealmEvent {
             // existing player and changing their state to connected. Currently, it is assumed that
             // all players in the state will be in a connected state.
 
-            PlayerState playerState = new PlayerState(playerSessionId);
+            String playerId = getPlayerId();
+            PlayerState playerState = new PlayerState(playerId, playerSessionId);
 
-            realmState.playerStates.add(playerState);
+            realmState.getPlayers().put(playerId, playerState);
         };
     }
 
     @Override
     public IRealmStateSelector getStateSelector() {
-        return (RealmState realmState) -> {
-            return null;
-        };
+        return new PlayerStateSelector(getPlayerId());
     }
 }

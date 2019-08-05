@@ -1,4 +1,4 @@
-package realm.mutaters;
+package realm.mutators;
 
 import realm.events.AbstractRealmEvent;
 

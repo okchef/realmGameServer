@@ -1,15 +1,20 @@
 package realm.events;
 
 import com.google.gson.Gson;
-import realm.mutaters.IRealmStateMutator;
-import realm.state.IRealmStateSelector;
+import realm.mutators.IRealmStateMutator;
+import realm.state.selectors.IRealmStateSelector;
 
 import java.io.Serializable;
 
 public abstract class AbstractRealmEvent implements Serializable {
-    public String playerId;
+    private String playerId;
 
-    public String gameId;
+    private String gameId;
+
+    public AbstractRealmEvent(String gameId, String playerId) {
+        this.gameId = gameId;
+        this.playerId = playerId;
+    }
 
     public abstract EventTargetType getEventTarget();
 
@@ -19,5 +24,21 @@ public abstract class AbstractRealmEvent implements Serializable {
 
     public final String toString() {
         return new Gson().toJson(this);
+    }
+
+    public String getPlayerId() {
+        return playerId;
+    }
+
+    public String getGameId() {
+        return gameId;
+    }
+
+    public void setPlayerId(String playerId) {
+        this.playerId = playerId;
+    }
+
+    public void setGameId(String gameId) {
+        this.gameId = gameId;
     }
 }

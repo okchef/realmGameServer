@@ -1,17 +1,19 @@
 package realm.events;
 
-import realm.mutaters.IRealmStateMutator;
+import realm.mutators.IRealmStateMutator;
+import realm.state.PlayerState;
 import realm.state.RealmState;
-import realm.state.IRealmStateSelector;
+import realm.state.selectors.IRealmStateSelector;
+import realm.state.selectors.PlayerStateSelector;
+import realm.utilities.HexMapUtilities;
 
 @RealmEvent(EventType.PLAYER_MOVE)
 public class PlayerMoveEvent extends AbstractRealmEvent {
-    public String playerSessionId;
 
-    public String direction;
+    private final String direction;
 
-    public PlayerMoveEvent(String playerSessionId, String direction) {
-        this.playerSessionId = playerSessionId;
+    public PlayerMoveEvent(String gameId, String playerId, String direction) {
+        super(gameId, playerId);
         this.direction = direction;
     }
 
@@ -23,14 +25,16 @@ public class PlayerMoveEvent extends AbstractRealmEvent {
     @Override
     public IRealmStateMutator getStateMutator() {
         return (RealmState realmState) -> {
-            //TODO: Update state
+            PlayerState playerState = realmState.getPlayerById(getPlayerId());
+            playerState.setPosition(HexMapUtilities.move(playerState.getPosition(), direction));
         };
     }
 
     @Override
     public IRealmStateSelector getStateSelector() {
-        return (RealmState realmState) -> {
+        return new PlayerStateSelector(getPlayerId());
+        /*return (RealmState realmState) -> {
             return null;
-        };
+        };*/
     }
 }

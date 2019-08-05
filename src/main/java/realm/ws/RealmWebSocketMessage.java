@@ -1,23 +1,29 @@
 package realm.ws;
 
 import com.google.gson.Gson;
+import com.google.gson.annotations.JsonAdapter;
 import org.springframework.web.socket.TextMessage;
 import realm.events.AbstractRealmEvent;
 import realm.events.RealmEvent;
+import realm.state.IRealmStateFragment;
+import realm.state.RealmStateFragmentAdapter;
 
 import java.io.Serializable;
 
 public class RealmWebSocketMessage implements Serializable {
 
-    public String tid;
+    private String tid;
 
-    public String gameSessionId;
+    private String gameSessionId;
 
-    public String playerSessionId;
+    private String playerSessionId;
 
-    public AbstractRealmEvent realmEvent;
+    private AbstractRealmEvent realmEvent;
 
-    public String realmEventType;
+    private String realmEventType;
+
+    @JsonAdapter(RealmStateFragmentAdapter.class)
+    private IRealmStateFragment realmStateFragment;
 
     public RealmWebSocketMessage(String tid, String gameSessionId, String playerSessionId, AbstractRealmEvent realmEvent) {
         this.tid = tid;
@@ -25,6 +31,11 @@ public class RealmWebSocketMessage implements Serializable {
         this.playerSessionId = playerSessionId;
         this.realmEvent = realmEvent;
         this.realmEventType = realmEvent.getClass().getAnnotation(RealmEvent.class).value();
+    }
+
+    public RealmWebSocketMessage(String tid, String gameSessionId, String playerSessionId, AbstractRealmEvent realmEvent, IRealmStateFragment realmStateFragment) {
+        this(tid, gameSessionId, playerSessionId, realmEvent);
+        this.realmStateFragment = realmStateFragment;
     }
 
     public TextMessage getMessage() {
