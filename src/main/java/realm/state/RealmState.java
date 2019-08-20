@@ -2,7 +2,6 @@ package realm.state;
 
 import java.io.Serializable;
 import java.util.Map;
-import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 /*
@@ -10,14 +9,21 @@ import java.util.concurrent.ConcurrentHashMap;
     The state should only be accessed outside this package via IRealmStateFragment.
  */
 public class RealmState implements Serializable {
+
+    // The ID of this game, generated when game is first created.
     private final String gameId;
 
-    // Maps playerId => playerState
+    // PlayerId => playerState
     private final ConcurrentHashMap<String, PlayerState> players = new ConcurrentHashMap();
 
-    public RealmState() {
-        gameId = UUID.randomUUID().toString();
+    // Game Map
+    private MapState map;
+
+    public RealmState(String gameId) {
+        this.gameId = gameId;
     }
+
+    // Accessors
 
     public String getGameId() {
         return gameId;
@@ -40,4 +46,11 @@ public class RealmState implements Serializable {
         return null;
     }
 
+    public MapState getMap() {
+        return map;
+    }
+
+    public void setMap(MapState map) {
+        this.map = map;
+    }
 }

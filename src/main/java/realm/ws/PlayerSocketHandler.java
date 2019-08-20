@@ -1,5 +1,9 @@
 package realm.ws;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
@@ -36,9 +40,17 @@ public class PlayerSocketHandler extends TextWebSocketHandler {
     public void afterConnectionEstablished(WebSocketSession session) throws IOException {
         sessionManager.addPlayerSession(session);
 
+        String playerId = UUID.randomUUID().toString();
+
+        // TODO: Find a better way to get the session ID to the player.
+        JsonObject connectionAck = new JsonObject();
+        connectionAck.add("playerSessionId", new JsonPrimitive(session.getId()));
+        connectionAck.add("playerId", new JsonPrimitive(playerId));
+        session.sendMessage(new TextMessage(new Gson().toJson(connectionAck)));
+
         WebSocketSession gameSession = sessionManager.getGameSession();
         if (gameSession != null) {
-            PlayerConnectedEvent playerConnectedEvent = new PlayerConnectedEvent(null, UUID.randomUUID().toString(), session.getId());
+            PlayerConnectedEvent playerConnectedEvent = new PlayerConnectedEvent(null, playerId, session.getId());
             playerMessageBroker.handleEvent(gameSession, session, playerConnectedEvent);
         } else {
             session.close(CloseStatus.NO_STATUS_CODE);

@@ -16,7 +16,7 @@ public class RealmStateManager {
 
     // IMPORTANT! The state should never be made available outside of the state manager.
     // It can only be interacted with via mutators and selectors.
-    private RealmState realmState = new RealmState();
+    private RealmState realmState = RealmStateFactory.initGameState();
 
     public void mutateState(AbstractRealmEvent event) {
         // TODO: IMPORTANT! Investigate thread safety of these state updates.

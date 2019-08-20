@@ -1,5 +1,7 @@
 package realm.state;
 
+import realm.realm.HexMapCoordinates;
+
 import java.io.Serializable;
 
 public class PlayerState implements Serializable {

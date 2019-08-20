@@ -1,6 +1,6 @@
-package realm.utilities;
+package realm.realm.utilities;
 
-import realm.state.HexMapCoordinates;
+import realm.realm.HexMapCoordinates;
 
 public class HexMapUtilities {
     public static HexMapCoordinates move(HexMapCoordinates start, String direction) {

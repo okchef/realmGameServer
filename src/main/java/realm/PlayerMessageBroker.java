@@ -42,11 +42,11 @@ public class PlayerMessageBroker extends AbstractMessageBroker {
         ArrayList<WebSocketSession> targetSessions = new ArrayList<>();
         switch(realmEvent.getEventTarget()) {
             case All:
-                targetSessions.addAll(sessionManager.getOtherPlayerSessions(playerSession));
+                targetSessions.addAll(sessionManager.getPlayerSessions());
                 targetSessions.add(gameSession);
                 break;
             case AllPlayers:
-                targetSessions.addAll(sessionManager.getOtherPlayerSessions(playerSession));
+                targetSessions.addAll(sessionManager.getPlayerSessions());
                 break;
             case GameServer:
                 targetSessions.add(gameSession);
@@ -55,7 +55,9 @@ public class PlayerMessageBroker extends AbstractMessageBroker {
 
         TextMessage outMessage = realmWebSocketMessage.getMessage();
         for (WebSocketSession targetSession : targetSessions) {
-            targetSession.sendMessage(outMessage);
+            if (targetSession.isOpen()) {
+                targetSession.sendMessage(outMessage);
+            }
         }
     }
 }

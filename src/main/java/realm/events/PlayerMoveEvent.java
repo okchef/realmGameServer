@@ -5,7 +5,7 @@ import realm.state.PlayerState;
 import realm.state.RealmState;
 import realm.state.selectors.IRealmStateSelector;
 import realm.state.selectors.PlayerStateSelector;
-import realm.utilities.HexMapUtilities;
+import realm.realm.utilities.HexMapUtilities;
 
 @RealmEvent(EventType.PLAYER_MOVE)
 public class PlayerMoveEvent extends AbstractRealmEvent {
