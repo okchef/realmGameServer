@@ -2,6 +2,7 @@ package realm.state;
 
 import realm.realm.HexMapCoordinates;
 
+import java.awt.*;
 import java.io.Serializable;
 
 public class PlayerState implements Serializable {
@@ -17,9 +18,13 @@ public class PlayerState implements Serializable {
 
     private String playerName;
 
+    private final String color;
+
     public PlayerState(String playerId, String playerSessionId) {
         this.playerId = playerId;
         this.playerSessionId = playerSessionId;
+        Color playerColor = new Color((float)Math.random(), (float)Math.random(), (float)Math.random());
+        this.color = String.format("#%02x%02x%02x", playerColor.getRed(), playerColor.getGreen(), playerColor.getBlue());
     }
 
     public boolean isConnected() {
