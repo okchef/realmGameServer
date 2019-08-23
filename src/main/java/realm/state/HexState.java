@@ -1,5 +1,6 @@
 package realm.state;
 
+import realm.realm.HexMapCoordinates;
 import realm.realm.TerrainType;
 
 import java.io.Serializable;
@@ -9,7 +10,10 @@ public class HexState implements Serializable {
 
     private String terrain = TerrainType.GRASS;
 
-    public HexState(String terrain) {
+    private HexMapCoordinates position;
+
+    public HexState(HexMapCoordinates position, String terrain) {
+        this.position = position;
         this.terrain = terrain;
     }
 

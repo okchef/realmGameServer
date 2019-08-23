@@ -11,12 +11,13 @@ public class HexMapGenerator {
         for (int i = 0; i < height; i++) {
             for (int j = 0; j < width; j++) {
                 HexState hexState;
+                HexMapCoordinates position = new HexMapCoordinates(i,j);
                 if (Math.random() < 0.2) {
-                    hexState = new HexState(TerrainType.WATER);
+                    hexState = new HexState(position, TerrainType.WATER);
                 } else {
-                    hexState = new HexState(TerrainType.GRASS);
+                    hexState = new HexState(position, TerrainType.GRASS);
                 }
-                hexes.put(new HexMapCoordinates(i,j), hexState);
+                hexes.put(position, hexState);
             }
         }
     }
