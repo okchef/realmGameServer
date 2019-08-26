@@ -10,7 +10,7 @@ public class HexState implements Serializable {
 
     private String terrain = TerrainType.GRASS;
 
-    private HexMapCoordinates position;
+    private final HexMapCoordinates position;
 
     public HexState(HexMapCoordinates position, String terrain) {
         this.position = position;
@@ -31,5 +31,9 @@ public class HexState implements Serializable {
 
     public void setTerrain(String terrain) {
         this.terrain = terrain;
+    }
+
+    public HexMapCoordinates getPosition() {
+        return position;
     }
 }

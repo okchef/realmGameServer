@@ -3,8 +3,8 @@ package realm.realm;
 import java.util.Objects;
 
 public class HexMapCoordinates {
-    public int x;
-    public int y;
+    public final int x;
+    public final int y;
 
     public HexMapCoordinates(int x, int y) {
         this.x = x;

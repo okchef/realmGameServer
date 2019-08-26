@@ -29,6 +29,7 @@ public class PlayerConnectedEvent extends AbstractRealmEvent {
 
             String playerId = getPlayerId();
             PlayerState playerState = new PlayerState(playerId, playerSessionId);
+            playerState.setPosition(realmState.getMap().getSpawnPosition());
 
             realmState.getPlayers().put(playerId, playerState);
         };

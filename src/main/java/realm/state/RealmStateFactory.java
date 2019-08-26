@@ -10,7 +10,7 @@ public class RealmStateFactory {
         RealmState realmState = new RealmState(gameId);
 
         MapState mapState = new MapState();
-        HexMapGenerator.generateMap(mapState.hexes, 100, 100);
+        HexMapGenerator.generateMap(mapState, 100, 100);
         realmState.setMap(mapState);
 
         return realmState;
